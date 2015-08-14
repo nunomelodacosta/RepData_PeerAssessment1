@@ -58,7 +58,7 @@ dfActivity$date <- ymd(dfActivity$date)
 dfActivity <- dfActivity %>% filter(!is.na(steps)) %>% arrange(date)
 ```
 #What is mean total number of steps taken per day?
-```{r mean and median steps per day}
+```{r mean and median steps per day, fig.height=4}
 ggplot(dfActivity, aes(x= date, y = steps)) +
         geom_histogram(stat = "identity") +
         labs(title = "Total number of steps taken per day",
@@ -76,7 +76,7 @@ median <- median(summary$total); median
 * **Note**: Mean and median were calculated removing NAs
 
 # What is the average daily activity pattern?
-```{r average daily activity pattern}
+```{r average daily activity pattern, fig.height=4}
 dfActivity <- dfActivity %>% group_by(interval) %>%
         mutate(averageStepsPer5Minutes = mean(steps))
 
@@ -98,7 +98,7 @@ has the highest average with **`r summary$maxAverage`** steps.
  * There are **`r sum(is.na(data$steps))`** observations with missing step count data.  
  **The strategy used to replace NAs is**: substitute NAs with the mean value for the same period of all days   
  
-```{r Imputing missing values}
+```{r Imputing missing values, fig.height=4}
 dfActivity <- tbl_df(data)
 # Changing date from factor to POSIXct type
 dfActivity$date <- ymd(dfActivity$date)
@@ -127,7 +127,7 @@ medianNoNa <- median(summary$total); median
 
 
 # Are there differences in activity patterns between weekdays and weekends?
-```{r differences in activity patterns between weekdays and weekends, fig.height=7}
+```{r differences in activity patterns between weekdays and weekends, fig.height=8}
 # Creating a factor variable day identifying the weekdays and weekend days
 dfActivity <- dfActivity %>% mutate(day = factor(ifelse(is.weekend(date), "weekend", "weekday"))) %>%
         # Grouping by weekday/weekend and then by the same time interval
