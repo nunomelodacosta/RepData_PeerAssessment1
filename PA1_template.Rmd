@@ -82,3 +82,29 @@ summary
 * The 5-minute interval **`r summary$interval`** 
 has the highest average with **`r summary$maxAverage`** steps.
 
+# Imputing missing values
+ * There are **`r sum(is.na(data$steps))`** observations with missing step count data
+ We will fill the NA with the median value for the same period of all days   
+ 
+```{r Imputing missing values}
+dfActivity <- tbl_df(data)
+# Changing date from factor to POSIXct type
+dfActivity$date <- ymd(dfActivity$date)
+
+dfActivity <- dfActivity %>% group_by(interval) %>%
+        mutate(steps = replace(steps, is.na(steps), mean(steps, na.rm = TRUE))) %>% ungroup
+                               
+hist <- ggplot(dfActivity, aes(x= date, y = steps)) +
+        geom_histogram(stat = "identity") +
+        labs(title = "Total number of steps taken per day",
+             x = "Day", y = "Number of steps per day")
+hist
+summary <- dfActivity %>% group_by(date) %>% summarise(total = sum(steps)) %>% ungroup
+mean <- mean(summary$total); mean
+median <- median(summary$total); median
+``` 
+* The mean of the total number of steps per day is 
+**`r prettyNum(mean, big.mark = ",",scientific = FALSE)`** 
+* The median of the total number of steps per day is
+**`r prettyNum(median, big.mark = ",",scientific = FALSE)`**
+
