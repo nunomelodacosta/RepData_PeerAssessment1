@@ -60,6 +60,20 @@ library(dplyr)
 ```r
 library(lubridate)
 library(ggplot2)
+library(chron)
+```
+
+```
+## Warning: package 'chron' was built under R version 3.2.1
+```
+
+```
+## 
+## Attaching package: 'chron'
+## 
+## The following objects are masked from 'package:lubridate':
+## 
+##     days, hours, minutes, seconds, years
 ```
 
 ##Load the data into R
@@ -120,11 +134,10 @@ dfActivity <- dfActivity %>% filter(!is.na(steps)) %>% arrange(date)
 #What is mean total number of steps taken per day?
 
 ```r
-hist <- ggplot(dfActivity, aes(x= date, y = steps)) +
+ggplot(dfActivity, aes(x= date, y = steps)) +
         geom_histogram(stat = "identity") +
         labs(title = "Total number of steps taken per day",
              x = "Day", y = "Number of steps taken")
-hist
 ```
 
 ![](PA1_template_files/figure-html/mean and median steps per day-1.png) 
@@ -194,12 +207,11 @@ dfActivity$date <- ymd(dfActivity$date)
 # Replacing step NAs with the average number of steps taken during the same interval, averaged across all days
 dfActivity <- dfActivity %>% group_by(interval) %>%
         mutate(steps = replace(steps, is.na(steps), mean(steps, na.rm = TRUE))) %>% ungroup
-                               
-hist <- ggplot(dfActivity, aes(x= date, y = steps)) +
+
+ggplot(dfActivity, aes(x= date, y = steps)) +
         geom_histogram(stat = "identity") +
         labs(title = "Total number of steps taken per day",
              x = "Day", y = "Number of steps per day")
-hist
 ```
 
 ![](PA1_template_files/figure-html/Imputing missing values-1.png) 
@@ -228,3 +240,29 @@ medianNoNa <- median(summary$total); median
 * The results obtained, by replacing NAs slightly as per below:
     + mean with NAs - mean without NAs = 0 steps
     + median with NAs - median without NAs = -1.1886792 steps
+
+# Are there differences in activity patterns between weekdays and weekends?
+
+```r
+# Creating a factor variable day identifying the weekdays and weekend days
+dfActivity <- dfActivity %>% mutate(day = factor(ifelse(is.weekend(date), "weekend", "weekday"))) %>%
+        # Grouping by weekday/weekend and then by the same time interval
+        group_by(day, interval) %>%
+        # Calculating then the mean of these subgroups
+        mutate(averageStepsPerDayType = mean(steps))
+        
+ggplot(dfActivity, aes(x = interval, y =  averageStepsPerDayType)) +
+        geom_line() +
+        labs(title = "Average activity pattern",
+             x = "Time of the day (HHMM)", y = "Average number of steps") +
+        facet_wrap(~day, ncol=1)
+```
+
+![](PA1_template_files/figure-html/differences in activity patterns between weekdays and weekends-1.png) 
+
+
+The two graphs show that the actvity patterns are different in weekend and weekdays. Some observations include:  
+
+* In weekdays the individual starts walking sooner
+* In weekdays at 08:35, the number of steps taken is the highest preceeded by very fast increase, being the highest of all intervals, including weekends.
+* During the weekend, after 10.00 the individual is more active compared to the weekdays
