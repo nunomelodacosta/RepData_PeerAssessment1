@@ -10,6 +10,14 @@ This assignment makes use of data from a personal activity monitoring device. Th
 The data for this assignment can be downloaded from this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip).
 Download and copy the zip file *repdata-data-activity.zip* into your R working directory
 
+## Load required packages
+```{r load packages}
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+```
+
 ##Load the data into R
 ```{r loaddata}
 unzip(zipfile = "repdata-data-activity.zip")
@@ -29,27 +37,25 @@ We will remove the NAs and adjust *date* type in the next step
 
 ## Preprocess the data
 ```{r preprocess data}
-library(dplyr)
-library(lubridate)
+
 dfActivity <- tbl_df(data)
 # Changing date from factor to POSIXct type
 dfActivity$date <- ymd(dfActivity$date)
 
 # removing missing observations
-dfActivity <- dfActivity %>% filter(!is.na(steps))
-dfActivity <- dfActivity %>% arrange(date)
+dfActivity <- dfActivity %>% filter(!is.na(steps)) %>% arrange(date)
 ```
 #What is mean total number of steps taken per day?
 ```{r mean and median steps per day}
-library(ggplot2)
 hist <- ggplot(dfActivity, aes(x= date, y = steps)) +
         geom_histogram(stat = "identity") +
-        labs(x = "Day", y = "Number of steps per day")
+        labs(title = "Total number of steps taken per day",
+             x = "Day", y = "Number of steps per day")
 hist
-dfActivity <- dfActivity %>% group_by(date)
-summary <- summarise(dfActivity, total = sum(steps)) %>% ungroup
-mean <- mean(summary$total)
-median <- median(summary$total)
+summary <- dfActivity %>% group_by(date) %>% summarise(total = sum(steps)) %>% ungroup
+mean <- mean(summary$total); mean
+
+median <- median(summary$total); median
 ```
 
 * The mean of the total number of steps per day is 
@@ -60,9 +66,19 @@ median <- median(summary$total)
 # What is the average daily activity pattern?
 ```{r average daily activity pattern}
 dfActivity <- dfActivity %>% group_by(interval) %>%
-        mutate(averageStepsPer5Minutes = mean(steps))%>%
-        ungroup
+        mutate(averageStepsPer5Minutes = mean(steps))
+
 ggplot(dfActivity, aes(x = interval, y =  averageStepsPer5Minutes)) +
         geom_line() +
-        labs(x = "5-minute interval", y = "Average number of steps")
-```  
+        labs(title = "Average daily activity pattern",
+             x = "Time of the day (HHMM)", y = "Average number of steps")
+
+summary <- dfActivity %>%
+        summarize(maxAverage = max(averageStepsPer5Minutes)) %>%
+        filter(maxAverage == max(maxAverage))
+summary
+
+```
+* The 5-minute interval **`r summary$interval`** 
+has the highest average with **`r summary$maxAverage`** steps.
+
