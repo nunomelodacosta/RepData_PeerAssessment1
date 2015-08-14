@@ -95,7 +95,8 @@ summary
 has the highest average with **`r summary$maxAverage`** steps.
 
 # Imputing missing values
- * There are **`r sum(is.na(data$steps))`** observations with missing step count data. We will replace NA with the mean value for the same period of all days   
+ * There are **`r sum(is.na(data$steps))`** observations with missing step count data.  
+ **The strategy used to replace NAs is**: substitute NAs with the mean value for the same period of all days   
  
 ```{r Imputing missing values}
 dfActivity <- tbl_df(data)
@@ -123,6 +124,7 @@ medianNoNa <- median(summary$total); median
 * The results obtained, by replacing NAs slightly as per below:
     + mean with NAs - mean without NAs = `r mean-meanNoNa` steps
     + median with NAs - median without NAs = `r median-medianNoNa` steps
+
 
 # Are there differences in activity patterns between weekdays and weekends?
 ```{r differences in activity patterns between weekdays and weekends, fig.height=7}

@@ -196,7 +196,8 @@ summary
 has the highest average with **206.1698113** steps.
 
 # Imputing missing values
- * There are **2304** observations with missing step count data. We will replace NA with the mean value for the same period of all days   
+ * There are **2304** observations with missing step count data.  
+ **The strategy used to replace NAs is**: substitute NAs with the mean value for the same period of all days   
  
 
 ```r
@@ -240,6 +241,7 @@ medianNoNa <- median(summary$total); median
 * The results obtained, by replacing NAs slightly as per below:
     + mean with NAs - mean without NAs = 0 steps
     + median with NAs - median without NAs = -1.1886792 steps
+
 
 # Are there differences in activity patterns between weekdays and weekends?
 
