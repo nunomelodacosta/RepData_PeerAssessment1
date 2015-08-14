@@ -1,25 +1,68 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Reproducible Research Assignment 1"
+author: "Nuno Melo"
+date: "August 13, 2015"
+output: html_document
 ---
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
+#Loading and preprocessing the data
+The data for this assignment can be downloaded from this [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip).
+Download and copy the zip file *repdata-data-activity.zip* into your R working directory
 
-## Loading and preprocessing the data
+##Load the data into R
+```{r loaddata}
+unzip(zipfile = "repdata-data-activity.zip")
+data <- read.csv("activity.csv")
+```
+## View the data summary
+```{r Visualize data and NAs}
+str(data)
+summary(data)
+```
+Note:  
+1. There are `r nrow(data)` observations  
+2. `r ncol(data)` variables  
+3. `r sum(is.na(data$steps))` observations with missing data  
+4. *date* variable is not POSIXct type  
+We will remove the NAs and adjust *date* type in the next step
 
+## Preprocess the data
+```{r preprocess data}
+library(dplyr)
+library(lubridate)
+dfActivity <- tbl_df(data)
+# Changing date from factor to POSIXct type
+dfActivity$date <- ymd(dfActivity$date)
 
+# removing missing observations
+dfActivity <- dfActivity %>% filter(!is.na(steps))
+dfActivity <- dfActivity %>% arrange(date)
+```
+#What is mean total number of steps taken per day?
+```{r mean and median steps per day}
+library(ggplot2)
+hist <- ggplot(dfActivity, aes(x= date, y = steps)) +
+        geom_histogram(stat = "identity") +
+        labs(x = "Day", y = "Number of steps per day")
+hist
+dfActivity <- dfActivity %>% group_by(date)
+summary <- summarise(dfActivity, total = sum(steps)) %>% ungroup
+mean <- mean(summary$total)
+median <- median(summary$total)
+```
 
-## What is mean total number of steps taken per day?
+* The mean of the total number of steps per day is 
+**`r prettyNum(mean, big.mark = ",",scientific = FALSE)`** 
+* The median of the total number of steps per day is
+**`r prettyNum(median, big.mark = ",",scientific = FALSE)`**
 
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+# What is the average daily activity pattern?
+```{r average daily activity pattern}
+dfActivity <- dfActivity %>% group_by(interval) %>%
+        mutate(averageStepsPer5Minutes = mean(steps))%>%
+        ungroup
+ggplot(dfActivity, aes(x = interval, y =  averageStepsPer5Minutes)) +
+        geom_line() +
+        labs(x = "5-minute interval", y = "Average number of steps")
+```  
